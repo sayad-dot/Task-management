@@ -8,16 +8,18 @@ function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+  
     try {
-      await axios.post('/auth/register', { name, email, password });
+      await axios.post('/auth/register', { username: name, email, password });
       alert('Registration successful! Please login.');
       window.location.href = '/';
     } catch (error) {
       console.error(error);
-      alert('Registration failed.');
+      const errorMessage = error.response?.data?.message || 'Registration failed.';
+      alert(errorMessage);
     }
   };
+  
 
   return (
     <div style={styles.container}>

@@ -1,36 +1,58 @@
-// src/pages/Dashboard.js
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Updated import
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import TaskForm from '../components/TaskForm';
+import TaskList from '../components/TaskList';
+import './Dashboard.css'; // Import the CSS file for dashboard styles
+import axios from '../services/api';
 
 const Dashboard = ({ isAuthenticated }) => {
-  const navigate = useNavigate(); // Using useNavigate instead of useHistory
+  const navigate = useNavigate();
+  const [tasks, setTasks] = useState([]);
 
-  const handleLogin = () => {
-    navigate('/login'); // Redirect to login page
-  };
-
-  const handleRegister = () => {
-    navigate('/register'); // Redirect to register page
-  };
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      const fetchTasks = async () => {
+        try {
+          const res = await axios.get('/tasks');
+          setTasks(res.data);
+        } catch (err) {
+          console.error('Failed to fetch tasks:', err);
+        }
+      };
+      fetchTasks();
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
-    // Here, you would remove the JWT token from localStorage or cookies to log out
+    localStorage.removeItem('token');
     alert('Logged out!');
-    navigate('/'); // Redirect to the homepage
+    navigate('/');  // Redirect to the homepage after logging out
+  };
+
+  const handleAddTask = (newTask) => {
+    setTasks((prevTasks) => [...prevTasks, newTask]);
   };
 
   return (
-    <div>
+    <div className="dashboard-container">
       {isAuthenticated ? (
-        <div>
-          <h1>Welcome to the Dashboard!</h1>
-          <button onClick={handleLogout}>Logout</button>
+        <div className="dashboard">
+          <div className="header">
+            <h1>Welcome to Your Dashboard</h1>
+            <button onClick={handleLogout} className="logout-btn">Logout</button>
+          </div>
+          <div className="task-section">
+            <TaskForm onTaskAdded={handleAddTask} />
+            <TaskList tasks={tasks} />
+          </div>
         </div>
       ) : (
-        <div>
+        <div className="auth-prompt">
           <h1>Please Log in or Register</h1>
-          <button onClick={handleLogin}>Login</button>
-          <button onClick={handleRegister}>Register</button>
+          <button onClick={() => navigate('/login')} className="auth-btn">Login</button>
+          <button onClick={() => navigate('/register')} className="auth-btn">Register</button>
         </div>
       )}
     </div>
@@ -38,3 +60,4 @@ const Dashboard = ({ isAuthenticated }) => {
 };
 
 export default Dashboard;
+
