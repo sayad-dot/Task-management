@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard'; // Corrected the path
-import Login from './components/Login';
+
 import Register from './components/Register';
+import AuthPage from './components/AuthPage';
 
 function App() {
   // Check if user is authenticated based on token in localStorage
@@ -10,7 +11,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+       
+        <Route path="/" element={<AuthPage />} />
+
         <Route path="/register" element={<Register />} />
         <Route 
           path="/dashboard" 
