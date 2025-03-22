@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2 } from 'lucide-react'; // Optional: Install lucide-react or use another icon set
+import './task.css';
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
@@ -20,24 +23,46 @@ const TaskList = () => {
     fetchTasks();
   }, []);
 
-  if (loading) {
-    return <p>Loading tasks...</p>;
-  }
+  const deleteTask = async (taskId) => {
+    try {
+      await axios.delete(`/tasks/${taskId}`);
+      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+    } catch (err) {
+      alert('Failed to delete task.');
+    }
+  };
 
-  if (error) {
-    return <p style={{ color: 'red' }}>{error}</p>;
-  }
+  if (loading) return <p>Loading tasks...</p>;
+
+  if (error) return <p className="error-text">{error}</p>;
 
   return (
-    <div>
-      <h3>Your Tasks</h3>
+    <div className="task-list-container">
+      <h3 className="task-list-title">Your Tasks</h3>
+
       {tasks.length === 0 ? (
-        <p>No tasks available.</p>
+        <p className="no-task-text">No tasks yet. Add one!</p>
       ) : (
-        <ul>
-          {tasks.map((task) => (
-            <li key={task._id}>{task.title}</li>
-          ))}
+        <ul className="task-list">
+          <AnimatePresence>
+            {tasks.map((task) => (
+              <motion.li
+                key={task._id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="task-item"
+              >
+                <span>{task.title}</span>
+                <button
+                  className="delete-task-button"
+                  onClick={() => deleteTask(task._id)}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </motion.li>
+            ))}
+          </AnimatePresence>
         </ul>
       )}
     </div>

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import axios from '../services/api';
+import { motion } from 'framer-motion'; // Add framer-motion for smooth animation
+import './task.css';
 
 const TaskForm = ({ onTaskAdded }) => {
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const addTask = async (e) => {
     e.preventDefault();
@@ -11,31 +14,42 @@ const TaskForm = ({ onTaskAdded }) => {
       setError('Task title is required');
       return;
     }
+
     try {
+      setLoading(true);
       const response = await axios.post('/tasks', { title });
-      setTitle(''); // Clear the input field
-      setError(''); // Reset error message
-      onTaskAdded(response.data); // Update the parent component state with the new task
+      setTitle('');
+      setError('');
+      onTaskAdded(response.data);
     } catch (err) {
       setError('Failed to add task. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <form onSubmit={addTask}>
+    <motion.div 
+      initial={{ opacity: 0, y: -10 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      className="task-form-container"
+    >
+      <form onSubmit={addTask} className="task-form">
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Task title"
-          required
+          placeholder="Enter a task..."
+          className="task-input"
         />
-        <button type="submit">Add Task</button>
+        <button type="submit" className="add-task-button" disabled={loading}>
+          {loading ? 'Adding...' : 'Add Task'}
+        </button>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
-    </div>
+      {error && <p className="error-text">{error}</p>}
+    </motion.div>
   );
 };
 
 export default TaskForm;
+
